@@ -1,9 +1,8 @@
 import requests
 
-url = 'http://localhost:1213/execute_script'
-files = {'script': open('loop.py', 'rb')}
+url = 'https://pc.datadude.dev/execute_script'
 data = {'user':'Gabriel','poll':'Poll'}
 
-response = requests.post(url, files=files, data=data)
+response = requests.post(url, data=data)
 
 print(response.text)
