@@ -7,12 +7,17 @@ from firebase_admin import credentials, initialize_app, storage
 import random2
 import random
 import string
+import os
 
 
-userlength = 25
-userletters = string.ascii_lowercase
-username = ''.join(random.choice(userletters) for i in range(userlength))
-poll = ''.join(random.choice(userletters) for i in range(userlength))
+# Open the JSON file
+with open('user_data.json') as f:
+    data = json.load(f)
+
+# Access the 'user' variable and print its value
+username = data['user']
+poll = data['poll']
+os.remove("user_data.json")
 
 cred = credentials.Certificate('firebase_key.json')
 initialize_app(cred, {'storageBucket': 'quid-eda9a.appspot.com'})
@@ -25,9 +30,10 @@ style= "Cartoon Network Studios, 2D animation, Color: Vibrant, bold, composition
 
 prompts = ["was"
         ,"was 9/11"
-        ,"was 9/11 an inside job"
-        ,"was 9/11 an inside job by the US government"]
-negative_prompt = "Split frame, out of frame, cropped, multiple frame, split panel, multi panel,amputee,autograph,bad anatomy,bad illustration ,bad proportions,beyond the borders,blank background,blurry,body out of frame,boring background,branding,cropped,cut off,deformed,disfigured,dismembered,disproportioned,distorted,draft,duplicate,duplicated features,extra arms,extra fingers,extra hands,extra legs,extra limbs,fault,flaw,fused fingers,grains,grainy,gross proportions,hazy,identifying mark,improper scale,incorrect physiology,incorrect ratio,indistinct,kitsch,logo,long neck,low quality,low resolution,macabre,malformed,mark,misshapen,missing arms,missing fingers,missing hands,missing legs,mistake,morbid,mutated hands,mutation,mutilated ,off-screen,out of frame,out of frame,outside the picture,pixelated,poorly drawn face,poorly drawn feet,poorly drawn hands,printed words,render,repellent,replicate,reproduce,revolting dimensions,script,shortened,sign,signature,split image,squint,storyboard,text,tiling,trimmed,ugly,unfocused,unattractive,unnatural pose,unreal engine,unsightly,watermark,written language"
+        #,"was 9/11 an inside job"
+        #,"was 9/11 an inside job by the US government"
+         ]
+negative_prompt = "Split frame, out of frame, cropped, multiple frame, split panel, multi panel,amputee,autograph,bad anatomy,bad illustration,bad proportions,beyond the borders,blank background,blurry,body out of frame,boring background,branding,cropped,cut off,deformed,disfigured,dismembered,disproportioned,distorted,draft,duplicate,duplicated features,extra arms,extra fingers,extra hands,extra legs,extra limbs,fault,flaw,fused fingers,grains,grainy,gross proportions,hazy,identifying mark,improper scale,incorrect physiology,incorrect ratio,indistinct,kitsch,logo,long neck,low quality,low resolution,macabre,malformed,mark,misshapen,missing arms,missing fingers,missing hands,missing legs,mistake,morbid,mutated hands,mutation,mutilated ,off-screen,out of frame,out of frame,outside the picture,pixelated,poorly drawn face,poorly drawn feet,poorly drawn hands,printed words,render,repellent,replicate,reproduce,revolting dimensions,script,shortened,sign,signature,split image,squint,storyboard,text,tiling,trimmed,ugly,unfocused,unattractive,unnatural pose,unreal engine,unsightly,watermark,written language"
 
 
 
@@ -71,7 +77,16 @@ for i in prompts:
             image.save('output_{}.png'.format(version), pnginfo=pnginfo)
             image.save('output_X.png', pnginfo=pnginfo)
 
-    
+
+            # Put your local file path 
+            fileName = 'output_{}.png'.format(counter)
+            bucket = storage.bucket()
+            blob = bucket.blob('wallpapers/{}/{}/{}/'.format(username,poll,fileName))
+            blob.upload_from_filename(fileName)
+
+            # Opt : if you want to make public access from the URL
+            blob.make_public()
+            print("your file url", blob.public_url)   
     else:
 
         image2 = open('output_X.png', 'rb').read()
@@ -123,15 +138,12 @@ for i in prompts:
                     image.save('output_{}.png'.format(version), pnginfo=pnginfo)
                     image.save('output_X.png'.format(version), pnginfo=pnginfo)
 
+                # Put your local file path 
+                fileName = 'output_{}.png'.format(counter)
+                bucket = storage.bucket()
+                blob = bucket.blob('wallpapers/{}/{}/{}/'.format(username,poll,fileName))
+                blob.upload_from_filename(fileName)
 
-
-    # Put your local file path 
-    fileName = 'output_{}.png'.format(counter)
-    bucket = storage.bucket()
-    blob = bucket.blob('/wallpapers/{}/{}/{}/'.format(username,poll,fileName))
-    blob.upload_from_filename(fileName)
-
-    # Opt : if you want to make public access from the URL
-    blob.make_public()
-
-    print("your file url", blob.public_url)
+                # Opt : if you want to make public access from the URL
+                blob.make_public()
+                print("your file url", blob.public_url)
