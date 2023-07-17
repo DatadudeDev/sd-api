@@ -1,7 +1,5 @@
 from flask import Flask, request
 import subprocess
-from loop import counter
-from loop import filename
 
 app = Flask(__name__)
 
