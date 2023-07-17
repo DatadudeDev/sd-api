@@ -10,19 +10,29 @@ class ApiListener:
 
     @app.route('/execute_script', methods=['POST'])
     def execute_script():
-        user = request.form.get('user')
-        poll = request.form.get('poll')
-
-        script = request.files['script']
-        script.save('script.py')
-
-        # Save user data to a JSON file
-        data = {'user': user, 'poll': poll}
-        with open('user_data.json', 'w') as f:
-            json.dump(data, f)
-
+        # Log the raw request data
+        raw_data = request.get_data()
+        print(f'Raw request data: {raw_data.decode()}')
+        
+        try:
+            # Parse 'user' and 'poll' from the JSON payload
+            data = request.json
+            user = data.get('user')
+            poll = data.get('poll')
+            print(f'user: {user}')
+            print(f'poll: {poll}')
+            
+            # Save user data to a JSON file
+            with open('user_data.json', 'w') as f:
+                json.dump(data, f)
+        except Exception as e:
+            print(f'Error parsing JSON: {e}')
+            import traceback
+            traceback.print_exc()
+            return 'Error parsing JSON', 400
+            
         # Execute the Python script as a subprocess
-        result = subprocess.run(['python', 'script.py'], capture_output=True, text=True)
+        result = subprocess.run(['python', 'apiDev.py'], capture_output=True, text=True)
         
         if result.returncode == 0:
             output = result.stdout
